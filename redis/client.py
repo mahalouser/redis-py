@@ -3,6 +3,8 @@ import errno
 import socket
 import threading
 import warnings
+import cPickle as pickle
+import zlib
 from redis.exceptions import ConnectionError, ResponseError, InvalidResponse
 from redis.exceptions import RedisError, AuthenticationError
 
@@ -957,7 +959,28 @@ class Redis(threading.local):
     def hvals(self, name):
         "Return the list of values within hash ``name``"
         return self.format_inline('HVALS', name)
-    
+
+
+    #### CUSTOM COMMANDS ####
+    '''These are for storing pickled objects in the cache.'''
+
+    def pset(self, name, object):
+        ''' Converts ``object`` to a pickled string and compresses it, then
+        calls set with that string and ``name`` as the key. '''
+        pobj = zlib.compress(pickle.dumps(object, 2), 1)
+        self.set(name, pobj)
+        
+    def pget(self, name):
+        ''' Retrieves a pickled object string at key ``name`` and then 
+        depickles and decompresses it and returns the resulting item.
+        Returns None if the object does not exist.'''
+        pobj = self.get(name)
+        if pobj is None: # No entry for this key
+            return None
+        else:
+            object = pickle.loads(zlib.decompress(pobj))
+            return object
+ 
 class Pipeline(Redis):
     """
     Pipelines provide a way to transmit multiple commands to the Redis server
