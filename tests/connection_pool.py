@@ -10,8 +10,8 @@ class ConnectionPoolTestCase(unittest.TestCase):
         r2 = redis.Redis(host='localhost', port=6379, db=9)
         self.assertEquals(r1.connection, r2.connection)
         
-        # if one o them switches, they should have
-        # separate conncetion objects
+        # if one of them switches, they should have
+        # separate connection objects
         r2.select('localhost', 6379, db=10)
         self.assertNotEqual(r1.connection, r2.connection)
         

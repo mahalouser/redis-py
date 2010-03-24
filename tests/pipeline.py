@@ -25,7 +25,7 @@ class PipelineTestCase(unittest.TestCase):
             )
             
     def test_invalid_command_in_pipeline(self):
-        # all commands but the invalid one should be excuted correctly
+        # all commands but the invalid one should be executed correctly
         self.client['c'] = 'a'
         pipe = self.client.pipeline()
         pipe.set('a', 1).set('b', 2).lpush('c', 3).set('d', 4)
